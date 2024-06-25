@@ -55,6 +55,7 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 alias ls='ls --color'
 alias vim='nvim'
 alias c='clear'
+alias texg='echo 1'
 
 # Shell integrations
 eval "$(fzf --zsh)"
