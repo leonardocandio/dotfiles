@@ -1,0 +1,29 @@
+#!/bin/zsh
+problem_dir="$2/"
+templates_dir="/Users/leonardocandio/dotfiles/.config/nvim/templates"
+mkdir $problem_dir
+
+case "$1" in
+    greedy)
+        tex_type="greedy.tex"
+    ;;
+    linear)
+        tex_type="greedy.tex"
+    ;;
+    *) 
+        tex_type="greedy.tex"
+    ;;
+esac
+
+
+if [[ -d "$templates_dir" ]]; then
+    cp -R "$templates_dir/math"/* "$problem_dir"
+    cp "$templates_dir/$tex_type" "$problem_dir"
+else
+    echo "Source directory not found."
+    exit 1
+fi
+
+
+
+

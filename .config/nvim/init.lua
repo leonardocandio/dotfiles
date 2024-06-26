@@ -697,6 +697,9 @@ require('lazy').setup({
                   'tex',
                 },
               }
+              require('luasnip.loaders.from_lua').lazy_load {
+                paths = { '~/.config/nvim/snippets/' },
+              }
             end,
           },
         },
@@ -716,8 +719,6 @@ require('lazy').setup({
       luasnip.config.setup {
         enable_autosnippets = true,
       }
-
-      require('luasnip.loaders.from_lua').lazy_load { paths = { '~/.config/nvim/snippets/' } }
 
       cmp.setup {
         snippet = {
@@ -788,24 +789,24 @@ require('lazy').setup({
     end,
   },
 
-  { -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is.
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
-    init = function()
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+  {
+    'uloco/bluloco.nvim',
+    lazy = false,
+    priority = 1000,
+    dependencies = { 'rktjmp/lush.nvim' },
+    config = function()
+      require('bluloco').setup {
+        style = 'auto', -- "auto" | "dark" | "light"
+        transparent = false,
+        italics = true,
+        terminal = vim.fn.has 'gui_running' == 1, -- bluoco colors are enabled in gui terminals per default.
+        guicursor = true,
+      }
 
-      -- You can configure highlights by doing something like:
-      vim.cmd.hi 'Comment gui=none'
+      vim.opt.termguicolors = true
+      vim.cmd 'colorscheme bluloco' -- your optional config goes here, see below.
     end,
   },
-
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
 
@@ -903,12 +904,6 @@ require('lazy').setup({
   -- require 'kickstart.plugins.neo-tree',
   require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
   {
-    'max397574/better-escape.nvim',
-    config = function()
-      require('better_escape').setup()
-    end,
-  },
-  {
     'stevearc/oil.nvim',
     opts = {},
     dependencies = {
@@ -920,14 +915,63 @@ require('lazy').setup({
       }
     end,
   },
+  {
+    'f-person/auto-dark-mode.nvim',
+    opts = {
+      update_interval = 1000,
+      set_dark_mode = function()
+        vim.o.background = 'dark'
+      end,
+      set_light_mode = function()
+        vim.o.background = 'light'
+      end,
+      config = function()
+        require('auto-dark-mode').setup {}
+      end,
+    },
+  },
+  {
+    'gbprod/yanky.nvim',
+    opts = {
+      -- your configuration comes here
+      -- or leave it empty to use the default settings
+      -- refer to the configuration section below
+    },
+  },
+  {
+    'karb94/neoscroll.nvim',
+    config = function()
+      require('neoscroll').setup {}
+    end,
+  },
+  {
+    'm4xshen/hardtime.nvim',
+    dependencies = { 'MunifTanjim/nui.nvim', 'nvim-lua/plenary.nvim' },
+    opts = {},
+  },
+  {
+    'lervag/vimtex',
+    lazy = false, -- we don't want to lazy load VimTeX
+    -- tag = "v2.15", -- uncomment to pin to a specific release
+    init = function()
+      -- VimTeX configuration goes here, e.g.
+      vim.g.vimtex_view_method = 'skim'
+    end,
+  },
   vim.keymap.set('n', '-', '<CMD>Oil<CR>', { desc = 'Open Oil' }),
-
+  vim.keymap.set({ 'n', 'x' }, 'p', '<Plug>(YankyPutAfter)'),
+  vim.keymap.set({ 'n', 'x' }, 'P', '<Plug>(YankyPutBefore)'),
+  vim.keymap.set({ 'n', 'x' }, 'gp', '<Plug>(YankyGPutAfter)'),
+  vim.keymap.set({ 'n', 'x' }, 'gP', '<Plug>(YankyGPutBefore)'),
+  vim.keymap.set('n', '<c-p>', '<Plug>(YankyPreviousEntry)'),
+  vim.keymap.set('n', '<c-n>', '<Plug>(YankyNextEntry)'),
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
-  { import = 'custom.plugins' },
+  -- { import = 'custom.plugins' },
+  --
 }, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
