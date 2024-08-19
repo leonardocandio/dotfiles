@@ -1,6 +1,6 @@
 #!/bin/zsh
 problem_dir="$2/"
-templates_dir="/Users/leonardocandio/dotfiles/.config/nvim/templates"
+templates_dir="$HOME/dotfiles/.config/nvim/templates"
 mkdir $problem_dir
 
 case "$1" in

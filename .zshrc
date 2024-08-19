@@ -59,3 +59,9 @@ alias c='clear'
 # Shell integrations
 eval "$(fzf --zsh)"
 eval "$(zoxide init --cmd cd zsh)"
+
+
+#Adding ~/scripts to path
+
+export PATH="$HOME/scripts:$PATH"
+
