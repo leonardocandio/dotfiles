@@ -1,0 +1,6 @@
+#!/bin/zsh
+if [[ $DARKMODE == 1 ]]; then
+    /opt/homebrew/bin/kitty +kitten themes --reload-in=all dark-mode
+else
+    /opt/homebrew/bin/kitty +kitten themes --reload-in=all light-mode 
+fi
