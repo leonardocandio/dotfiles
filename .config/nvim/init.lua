@@ -98,6 +98,7 @@ vim.g.have_nerd_font = true
 -- NOTE: You can change these options as you wish!
 --  For more options, you can see `:help option-list`
 
+vim.opt.termguicolors = true
 -- Make line numbers default
 vim.opt.number = true
 -- You can also add relative line numbers, to help with jumping.
@@ -197,6 +198,46 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
+-- Keybinds for selecting in a buffer
+--
+--
+vim.keymap.set('n', '<leader>el', 'vg_', { desc = 'Select to end of line' })
+vim.keymap.set('n', '<leader>eo', 'ggVGp', { desc = 'select all and paste' })
+vim.keymap.set('n', '<leader>ea', 'ggVG', { desc = 'select all' })
+vim.keymap.set('n', '<leader>ep', '`[v`]', { desc = 'select pasted text' })
+
+-- Moving
+--
+--
+vim.keymap.set('n', '<leader>mj', ':m .+1<CR>==', { desc = 'Move line down' })
+vim.keymap.set('n', '<leader>mk', ':m .-2<CR>==', { desc = 'Move line up' })
+vim.keymap.set('v', '<leader>mj', ":m '>+1<CR>gv=gv", { desc = 'Move Line Down in Visual Mode' })
+vim.keymap.set('v', '<leader>mk', ":m '<-2<CR>gv=gv", { desc = 'Move Line Up in Visual Mode' })
+
+-- Yank
+
+vim.keymap.set('n', '<leader>yf', ':%y<cr>', { desc = 'yank current file to the clipboard buffer' })
+
+-- Competitve
+vim.keymap.set('n', '<leader>or', ':CompetiTest run<CR>', { desc = 'compile and run' })
+vim.keymap.set('n', '<leader>on', ':CompetiTest run<CR>', { desc = 'run without compiling' })
+vim.keymap.set('n', '<leader>oc', ':CompetiTest receive contest<CR>', { desc = 'receive new contest' })
+vim.keymap.set('n', '<leader>op', ':CompetiTest receive problem<CR>', { desc = 'receive new problem' })
+vim.keymap.set('n', '<leader>ot', ':CompetiTest receive testcases <CR>', { desc = 'receive new testcases' })
+vim.keymap.set('n', '<leader>os', ':CompetiTest show_ui <CR>', { desc = 'show ui' })
+
+--Misc
+vim.keymap.set('i', '<c-p>', function()
+  require('telescope.builtin').registers()
+end, { remap = true, silent = false, desc = ' and paste register in insert mode' })
+
+vim.keymap.set('n', 'zz', '<CMD>update<CR>', { desc = 'Quick save' })
+vim.keymap.set('n', '<leader>us', ':s/\\v', { desc = 'substitute on line' })
+vim.keymap.set('n', '<leader>uS', ':%s/\\v', { desc = 'substitute in file' })
+
+vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
+vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
+
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -244,9 +285,6 @@ require('lazy').setup({
   --  This is equivalent to:
   --    require('Comment').setup({})
 
-  -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim', opts = {} },
-
   -- Here is a more advanced example where we pass configuration
   -- options to `gitsigns.nvim`. This is equivalent to the following Lua:
   --    require('gitsigns').setup({ ... })
@@ -256,15 +294,34 @@ require('lazy').setup({
     'lewis6991/gitsigns.nvim',
     opts = {
       signs = {
-        add = { text = '+' },
-        change = { text = '~' },
+        add = { text = '┃' },
+        change = { text = '┃' },
         delete = { text = '_' },
         topdelete = { text = '‾' },
         changedelete = { text = '~' },
+        untracked = { text = '┆' },
       },
     },
   },
-
+  {
+    'kdheepak/lazygit.nvim',
+    cmd = {
+      'LazyGit',
+      'LazyGitConfig',
+      'LazyGitCurrentFile',
+      'LazyGitFilter',
+      'LazyGitFilterCurrentFile',
+    },
+    -- optional for floating window border decoration
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+    },
+    -- setting the keybinding for LazyGit with 'keys' is recommended in
+    -- order to load the plugin when the command is run for the first time
+    keys = {
+      { '<leader>gl', '<cmd>LazyGit<cr>', desc = 'LazyGit' },
+    },
+  },
   -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
   --
   -- This is often very useful to both group configuration, as well as handle
@@ -295,6 +352,12 @@ require('lazy').setup({
         ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
         ['<leader>t'] = { name = '[T]oggle', _ = 'which_key_ignore' },
         ['<leader>h'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
+        ['<leader>e'] = { name = 's[E]lect', _ = 'which_key_ignore' },
+        ['<leader>m'] = { name = '[M]ove', _ = 'which_key_ignore' },
+        ['<leader>y'] = { name = '[Y]ank', _ = 'which_key_ignore' },
+        ['<leader>u'] = { name = 's[U]bstitute', _ = 'which_key_ignore' },
+        ['<leader>o'] = { name = 'c[O]mpetitive', _ = 'which_key_ignore' },
+        ['<leader>g'] = { name = '[G]it', _ = 'which_key_ignore' },
       }
       -- visual mode
       require('which-key').register({
@@ -453,7 +516,6 @@ require('lazy').setup({
       -- (sometimes called LSP servers, but that's kind of like ATM Machine) are standalone
       -- processes that communicate with some "client" - in this case, Neovim!
       --
-      -- LSP provides Neovim with features like:
       --  - Go to definition
       --  - Find references
       --  - Autocompletion
@@ -462,7 +524,6 @@ require('lazy').setup({
       --
       -- Thus, Language Servers are external tools that must be installed separately from
       -- Neovim. This is where `mason` and related plugins come into play.
-      --
       -- If you're wondering about lsp vs treesitter, you can check out the wonderfully
       -- and elegantly composed help section, `:help lsp-vs-treesitter`
 
@@ -581,7 +642,32 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        -- clangd = {},
+        clangd = {
+          capabilities = {
+            offsetEncoding = {
+              'utf-16',
+            },
+          },
+          cmd = {
+            'clangd',
+            '--clang-tidy',
+            '--completion-style=detailed',
+            '--function-arg-placeholders',
+            '--fallback-style=llvm',
+          },
+          init_options = {
+            usePlaceholders = true,
+            completeUnimported = true,
+            clangdFileStatus = true,
+          },
+        },
+        harper_ls = {
+          settings = {
+            linters = {
+              sentence_capitalization = false,
+            },
+          },
+        },
         -- gopls = {},
         -- pyright = {},
         -- rust_analyzer = {},
@@ -798,28 +884,131 @@ require('lazy').setup({
       }
     end,
   },
-
   {
-    'uloco/bluloco.nvim',
+    'scottmckendry/cyberdream.nvim',
     lazy = false,
     priority = 1000,
-    dependencies = { 'rktjmp/lush.nvim' },
+    hide_fillchars = true,
+    transparent = true,
+    opts = {
+      theme = {
+        variant = 'auto',
+      },
+    },
+  },
+  {
+    'nvim-lualine/lualine.nvim',
+    event = 'VeryLazy',
+    opts = {
+      options = {
+        theme = 'auto',
+      },
+    },
+  },
+  {
+    'abecodes/tabout.nvim',
+    lazy = false,
     config = function()
-      require('bluloco').setup {
-        style = 'auto', -- "auto" | "dark" | "light"
-        transparent = false,
-        italics = true,
-        terminal = vim.fn.has 'gui_running' == 1, -- bluoco colors are enabled in gui terminals per default.
-        guicursor = true,
+      require('tabout').setup {
+        tabkey = '<Tab>', -- key to trigger tabout, set to an empty string to disable
+        backwards_tabkey = '<S-Tab>', -- key to trigger backwards tabout, set to an empty string to disable
+        act_as_tab = true, -- shift content if tab out is not possible
+        act_as_shift_tab = false, -- reverse shift content if tab out is not possible (if your keyboard/terminal supports <S-Tab>)
+        default_tab = '<C-t>', -- shift default action (only at the beginning of a line, otherwise <TAB> is used)
+        default_shift_tab = '<C-d>', -- reverse shift default action,
+        enable_backwards = true, -- well ...
+        completion = false, -- if the tabkey is used in a completion pum
+        tabouts = {
+          { open = "'", close = "'" },
+          { open = '"', close = '"' },
+          { open = '`', close = '`' },
+          { open = '(', close = ')' },
+          { open = '[', close = ']' },
+          { open = '{', close = '}' },
+        },
+        ignore_beginning = true, --[[ if the cursor is at the beginning of a filled element it will rather tab out than shift the content ]]
+        exclude = {}, -- tabout will ignore these filetypes
       }
-
-      vim.opt.termguicolors = true
-      vim.cmd 'colorscheme bluloco' -- your optional config goes here, see below.
+    end,
+    dependencies = { -- These are optional
+      'nvim-treesitter/nvim-treesitter',
+      'L3MON4D3/LuaSnip',
+      'hrsh7th/nvim-cmp',
+    },
+    opt = true, -- Set this to true if the plugin is optional
+    event = 'InsertCharPre', -- Set the event to 'InsertCharPre' for better compatibility
+    priority = 1000,
+  },
+  {
+    'L3MON4D3/LuaSnip',
+    keys = function()
+      -- Disable default tab keybinding in LuaSnip
+      return {}
     end,
   },
+  { 'chrisgrieser/nvim-spider', lazy = true },
+  { 'HiPhish/rainbow-delimiters.nvim', event = 'VeryLazy' },
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
-
+  {
+    'folke/flash.nvim',
+    event = 'VeryLazy',
+    opts = {},
+    keys = {
+      {
+        's',
+        mode = { 'n', 'x', 'o' },
+        function()
+          require('flash').jump()
+        end,
+        desc = 'Flash',
+      },
+      {
+        'S',
+        mode = { 'n', 'x', 'o' },
+        function()
+          require('flash').treesitter()
+        end,
+        desc = 'Flash Treesitter',
+      },
+      {
+        'r',
+        mode = 'o',
+        function()
+          require('flash').remote()
+        end,
+        desc = 'Remote Flash',
+      },
+      {
+        'R',
+        mode = { 'o', 'x' },
+        function()
+          require('flash').treesitter_search()
+        end,
+        desc = 'Treesitter Search',
+      },
+      {
+        '<c-s>',
+        mode = { 'c' },
+        function()
+          require('flash').toggle()
+        end,
+        desc = 'Toggle Flash Search',
+      },
+    },
+  },
+  {
+    'kelly-lin/ranger.nvim',
+    config = function()
+      require('ranger-nvim').setup { replace_netrw = true }
+      vim.api.nvim_set_keymap('n', '<leader>ef', '', {
+        noremap = true,
+        callback = function()
+          require('ranger-nvim').open(true)
+        end,
+      })
+    end,
+  },
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
     config = function()
@@ -838,30 +1027,12 @@ require('lazy').setup({
       -- - sr)'  - [S]urround [R]eplace [)] [']
       require('mini.surround').setup()
 
-      -- Simple and easy statusline.
-      --  You could remove this setup call if you don't like it,
-      --  and try some other statusline plugin
-      local statusline = require 'mini.statusline'
-      -- set use_icons to true if you have a Nerd Font
-      statusline.setup { use_icons = vim.g.have_nerd_font }
-
-      -- You can configure sections in the statusline by overriding their
-      -- default behavior. For example, here we set the section for
-      -- cursor location to LINE:COLUMN
-      ---@diagnostic disable-next-line: duplicate-set-field
-      statusline.section_location = function()
-        return '%2l:%-2v'
-      end
-
-      -- ... and there is more!
       --  Check out: https://github.com/echasnovski/mini.nvim
 
       require('mini.pairs').setup()
       require('mini.animate').setup()
       require('mini.comment').setup()
       require('mini.indentscope').setup()
-      require('mini.jump2d').setup()
-      require('mini.move').setup()
       require('mini.starter').setup()
     end,
   },
@@ -921,19 +1092,21 @@ require('lazy').setup({
     },
     config = function()
       require('oil').setup {
-        default_file_explorer = true,
+        default_file_explorer = false,
       }
     end,
   },
   {
     'f-person/auto-dark-mode.nvim',
     opts = {
-      update_interval = 1000,
+      update_interval = 2000,
       set_dark_mode = function()
         vim.o.background = 'dark'
+        vim.cmd 'colorscheme cyberdream'
       end,
       set_light_mode = function()
         vim.o.background = 'light'
+        vim.cmd 'colorscheme cyberdream'
       end,
       config = function()
         require('auto-dark-mode').setup {}
@@ -947,6 +1120,89 @@ require('lazy').setup({
       -- or leave it empty to use the default settings
       -- refer to the configuration section below
     },
+  },
+  {
+    'xeluxee/competitest.nvim',
+    dependencies = 'MunifTanjim/nui.nvim',
+    config = function()
+      require('competitest').setup {
+        compile_command = {
+          cpp = {
+            exec = 'g++-14',
+            args = {
+              '-Wall',
+              '-Wextra',
+              '-Wconversion',
+              '-O2',
+              '-std=c++17',
+              '$(FABSPATH)',
+              '-o',
+              '$(ABSDIR)/$(FNOEXT)',
+            },
+          },
+        },
+        run_command = {
+          cpp = { exec = '/$(ABSDIR)/$(FNOEXT)' },
+        },
+        save_current_file = true,
+        compile_directory = '.',
+        running_directory = '.',
+        testcases_directory = './testcases',
+        template_file = {
+          cpp = '/Users/leonardocandio/dotfiles/.config/nvim/templates/cpp/contests.cpp',
+        },
+        received_problems_path = function(task, file_extension)
+          local function sanitize(str)
+            return str:lower():gsub('%s+', '_'):gsub('[^%w_-]', '')
+          end
+
+          local judge, contest
+          local hyphen = task.group:find ' %- '
+          if not hyphen then
+            judge = sanitize(task.group)
+            contest = 'practice'
+          else
+            judge = sanitize(task.group:sub(1, hyphen - 1))
+            contest = sanitize(task.group:sub(hyphen + 3))
+          end
+
+          local problem_name = sanitize(task.name)
+          local cwd = vim.loop.cwd()
+          contest = 'practice'
+
+          return string.format('%s/%s/%s.%s', cwd, contest, problem_name, file_extension)
+        end,
+        received_contests_directory = function(task, file_extension)
+          local function sanitize(str)
+            return str:lower():gsub('%s+', '_'):gsub('[^%w_-]', '')
+          end
+
+          local judge, contest
+          local hyphen = task.group:find ' %- '
+          if not hyphen then
+            judge = sanitize(task.group)
+            contest = 'practice'
+          else
+            judge = sanitize(task.group:sub(1, hyphen - 1))
+            contest = sanitize(task.group:sub(hyphen + 3))
+          end
+          local cwd = vim.loop.cwd()
+
+          return string.format('%s/%s', cwd, contest)
+        end,
+        received_contests_problems_path = function(task, file_extension)
+          local function sanitize(str)
+            return str:lower():gsub('%s+', '_'):gsub('[^%w_-]', '')
+          end
+          return string.format('%s.%s', sanitize(task.name), file_extension)
+        end,
+        received_contests_prompt_extension = false,
+        received_contests_prompt_directory = false,
+        received_problems_prompt_path = false,
+        open_received_problems = true,
+        open_received_contests = true,
+      }
+    end,
   },
   {
     'folke/noice.nvim',
@@ -982,11 +1238,6 @@ require('lazy').setup({
         },
       }
     end,
-  },
-  {
-    'm4xshen/hardtime.nvim',
-    dependencies = { 'MunifTanjim/nui.nvim', 'nvim-lua/plenary.nvim' },
-    opts = {},
   },
   {
     'lervag/vimtex',

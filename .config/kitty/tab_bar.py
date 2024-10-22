@@ -19,11 +19,11 @@ from kitty.utils import color_as_int
 
 timer_id = None
 
-ICON = "  "
+ICON = "  "
 RIGHT_MARGIN = 1
 REFRESH_TIME = 15
 opts = get_options()
-icon_fg = as_rgb(color_as_int(opts.color15))
+icon_fg = as_rgb(color_as_int(opts.color3))
 icon_bg = as_rgb(color_as_int(opts.color8))
 bat_text_color = as_rgb(color_as_int(opts.color15))
 clock_color = as_rgb(color_as_int(opts.color15))
@@ -53,6 +53,7 @@ def _draw_icon(draw_data: DrawData, screen: Screen, index: int) -> int:
         return 0
 
     screen.cursor.bg = color_as_int(draw_data.default_bg)
+    screen.cursor.fg = icon_fg
     screen.draw(ICON)
     screen.cursor.x = len(ICON)
     return screen.cursor.x
@@ -80,6 +81,7 @@ def _draw_left_status(
     #             cwd = w.cwd_of_child or ''
     #             log_error(cwd)
 
+    screen.cursor.fg = as_rgb(color_as_int(opts.color14))
     draw_title(draw_data, screen, tab, index)
     trailing_spaces = min(max_title_length - 1, draw_data.trailing_spaces)
     max_title_length -= trailing_spaces
@@ -91,7 +93,6 @@ def _draw_left_status(
         screen.draw(" " * trailing_spaces)
     end = screen.cursor.x
     screen.cursor.bold = screen.cursor.italic = False
-    screen.cursor.fg = 0
     if not is_last:
         screen.cursor.bg = as_rgb(color_as_int(draw_data.inactive_bg))
         screen.draw(draw_data.sep)
@@ -158,7 +159,6 @@ def draw_tab(
     is_last: bool,
     extra_data: ExtraData,
 ) -> int:
-
     _draw_icon(draw_data, screen, index)
     _draw_left_status(
         draw_data,
