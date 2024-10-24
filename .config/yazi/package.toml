@@ -1,0 +1,5 @@
+[plugin]
+deps = [{ use = "yazi-rs/plugins:git", rev = "4f1d0ae" }, { use = "Lil-Dank/lazygit", rev = "c82794f" }]
+
+[flavor]
+deps = []
